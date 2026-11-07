@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Stand-in for the Netflix app. NVIDIA's NvShieldTech hook sends every press of the
+  remote's Netflix button (keycode 199) to the package com.netflix.ninja as the broadcast
+  com.netflix.ninja.intent.action.NETFLIX_KEY, and falls back to the Play Store when
+  getLeanbackLaunchIntentForPackage("com.netflix.ninja") returns null. This app takes the
+  package name and opens another app instead, so it needs a LEANBACK_LAUNCHER activity too.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.netflix.ninja"
+    android:versionCode="2"
+    android:versionName="1.1">
+
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="30" />
+
+    <!-- Lets getLeanbackLaunchIntentForPackage() see the target app on Android 11+. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:label="@string/app_name"
+        android:allowBackup="false"
+        android:hasCode="true">
+        <!-- Required: NVIDIA's hook only counts the package as installed if it has one. -->
+        <activity
+            android:name=".LaunchActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".NetflixKeyReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.netflix.ninja.intent.action.NETFLIX_KEY" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
